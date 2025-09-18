@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop - 90s Sports Shop</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/shop.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <a href="/index.html"><img src="/Asset/logo.png" alt="90s Sports Logo"></a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/index.html">Home</a></li>
+                <li><a href="/about.html">About</a></li>
+                <li><a href="/shop.html">Shop</a></li>
+                <li><a href="/contact.html">Contact Us</a></li>
+                <li id="cart-nav-item">
+                    <a href="/cart.html"><i class="fas fa-shopping-cart"></i></a>
+                    <span id="cart-count">0</span>
+                </li>
+                <li id="login-nav-link" style="display: none;">
+                    <a href="/login.html" class="login-btn-nav">Login</a>
+                </li>
+                <li id="user-profile-container" style="display: none;">
+                    <img id="user-profile-pic" src="" alt="Profile">
+                    <button id="signout-btn">Sign Out</button>
+                </li>
+            </ul>
+            <div class="menu-toggle" id="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </nav>
+    </header>
+
+    <main class="shop-container">
+        <!-- Left Filter Column -->
+        <aside class="filter-column">
+            <h2>Filters</h2>
+            <div class="filter-group">
+                <h3>Search Products</h3>
+                <input type="search" id="search-input" placeholder="e.g., SS Royal, bat...">
+            </div>
+            <div class="filter-group">
+                <h3>Categories</h3>
+                <select id="category-filter"><option>All Products</option></select>
+            </div>
+            <div class="filter-group">
+                <h3>Price Range</h3>
+                <div class="price-slider-container">
+                    <input type="range" id="price-range" min="0" max="30000" step="100" value="30000">
+                    <div class="price-label">Up to <span id="price-value">₹30,000</span></div>
+                </div>
+            </div>
+            <div class="filter-group">
+                <h3>Custom Price</h3>
+                <div class="custom-price-inputs">
+                    <input type="number" id="min-price" placeholder="Min">
+                    <span>-</span>
+                    <input type="number" id="max-price" placeholder="Max">
+                </div>
+                <button id="custom-price-btn">Go</button>
+            </div>
+        </aside>
+
+        <!-- Right Products Column -->
+        <section class="products-column">
+            <div id="products-grid" class="products-grid">
+                <!-- Products load here via JS -->
+            </div>
+            <div id="pagination-container" class="pagination-container">
+                <!-- Pagination links load here via JS -->
+            </div>
+        </section>
+    </main>
+    
+    <div id="toast-container"></div>
+    
+    <!-- Product Modal (Pop-up) -->
+    <div id="product-modal" class="product-modal">
+        <div id="product-modal-overlay" class="product-modal-overlay"></div>
+        <div class="modal-content">
+            <button class="close-modal-btn">&times;</button>
+            <div class="modal-body">
+                <div class="modal-image-container">
+                    <img id="modal-image" src="" alt="Product Image">
+                </div>
+                <div class="modal-details-container">
+                    <h2 id="modal-title">Product Title</h2>
+                    <div class="modal-rating" id="modal-rating-stars"></div>
+                    <div class="modal-price">
+                        <span id="modal-original-price" class="original-price"></span>
+                        <span id="modal-discount-price" class="current-price"></span>
+                    </div>
+                    <p id="modal-description"></p>
+                    <div class="modal-buttons-container">
+                        <button class="add-to-cart-btn-modal"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
+                        <button class="buy-now-btn-modal"><i class="fas fa-bolt"></i> Buy Now</button>
+                    </div>
+                    <div class="comments-section">
+                        <h4 class="comments-toggle">View Reviews <i class="fas fa-chevron-down"></i></h4>
+                        <div class="comments-content" style="display:none;">
+                            <div id="comments-list"></div>
+                            <div id="add-comment-container"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Login Modal (for Buy Now feature) -->
+    <div id="login-modal" class="login-modal">
+        <div class="login-modal-overlay"></div>
+        <div class="login-modal-content">
+            <button class="close-login-modal-btn">&times;</button>
+            <i class="fas fa-exclamation-circle login-modal-icon"></i>
+            <h3>Authentication Required</h3>
+            <p>Please log in to continue with your purchase.</p>
+             <a href="/login.html" class="go-to-login-btn">Go to Login</a>
+        </div>
+    </div>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="/auth.js"></script>
+    <script src="/shop.js"></script>
+    
+    <!-- Footer Section -->
+    <footer class="footer">
+      <div class="footer-container">
+        <div class="footer-left">
+          <img src="/Asset/logo.png" alt="Logo" class="footer-logo">
+          <p class="footer-desc">
+            Our shop delivers the best quality products with<br>
+            fast and reliable delivery at your doorstep.
+          </p>
+          <div class="footer-socials">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-whatsapp"></i></a>
+          </div>
+        </div>
+        <div class="footer-links">
+          <h3>Useful Links</h3>
+          <ul>
+            <li><a href="/index.html">Home</a></li>
+            <li><a href="/about.html">About</a></li>
+            <li><a href="/shop.html">Shop</a></li>
+            <li><a href="/contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-contact">
+          <h3>Contact</h3>
+          <p><i class="fas fa-map-marker-alt"></i> Address: 149 Near Guru mobile Malli.</p>
+          <p><i class="fas fa-phone-alt"></i> Hotline: 99443 28298</p>
+          <p><i class="fas fa-envelope"></i> Email: ninteessports@gmail.com</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2025 YourShop. All Rights Reserved.</p>
+      </div>
+    </footer>
+</body>
+</html>

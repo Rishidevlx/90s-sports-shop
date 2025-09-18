@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Register - 90s Sports</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/login.css">
+</head>
+<body>
+    <div class="login-body-container">
+        <a href="/index.html" class="back-to-home-btn">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+
+        <div class="container" id="container">
+            <!-- Register Form -->
+            <div class="form-container sign-up-container">
+                <form id="register-form">
+                    <h1>Create Account</h1>
+                    <div id="google-signin-btn-register"></div>
+                    <span>or use your email for registration</span>
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="register-name" placeholder="Name" required />
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="register-email" placeholder="Email" required />
+                    </div>
+                     <div class="input-group">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" id="register-phone" placeholder="Phone" required />
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="register-password" placeholder="Password" required />
+                        <i class="fas fa-eye-slash eye-icon" data-target="register-password"></i>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="register-confirm-password" placeholder="Confirm Password" required />
+                        <i class="fas fa-eye-slash eye-icon" data-target="register-confirm-password"></i>
+                    </div>
+                    <button type="submit">Sign Up</button>
+                    <p class="mobile-switch">Already have an account? <a href="#" id="signInLinkMobile">Sign In</a></p>
+                </form>
+            </div>
+            <!-- Login Form -->
+            <div class="form-container sign-in-container">
+                <form id="login-form">
+                    <h1>Sign in</h1>
+                    <div id="google-signin-btn-login"></div>
+                    <span>or use your account</span>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="text" id="login-email" placeholder="Email or Username" required/>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="login-password" placeholder="Password" required/>
+                        <i class="fas fa-eye-slash eye-icon" data-target="login-password"></i>
+                    </div>
+                    <div class="login-options">
+                        <label><input type="checkbox" id="remember-me"> Remember me</label>
+                        <a href="#" id="forgot-password-link">Forgot your password?</a>
+                    </div>
+                    <button type="submit">Sign In</button>
+                    <p class="mobile-switch">Don't have an account? <a href="#" id="signUpLinkMobile">Sign Up</a></p>
+                </form>
+            </div>
+            <!-- Overlay Panels -->
+            <div class="overlay-container">
+                <div class="overlay">
+                    <div class="overlay-panel overlay-left">
+                        <img src="/Asset/logo.png" alt="Logo" class="overlay-logo">
+                        <h1>Welcome Back!</h1>
+                        <p>To keep connected with us please login with your personal info</p>
+                        <button class="ghost" id="signIn">Sign In</button>
+                    </div>
+                    <div class="overlay-panel overlay-right">
+                        <img src="/Asset/logo.png" alt="Logo" class="overlay-logo">
+                        <h1>Hello, Friend!</h1>
+                        <p>Enter your personal details and start your journey with us</p>
+                        <button class="ghost" id="signUp">Sign Up</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL for OTP and Popups -->
+    <div class="modal-backdrop" id="modal-backdrop" style="display: none;">
+        <!-- "Already Exists" Popup -->
+        <div class="modal-content" id="already-exists-modal" style="display: none;">
+            <span class="close-modal">&times;</span>
+            <h3>Account Exists</h3>
+            <p>An account with this email or phone number already exists. Please sign in instead.</p>
+            <button class="modal-btn" id="go-to-signin-btn">Go to Sign In</button>
+        </div>
+
+        <!-- Forgot Password / OTP Flow -->
+        <div class="modal-content" id="forgot-password-modal" style="display: none;">
+             <span class="close-modal">&times;</span>
+            <!-- Step 1: Enter Email -->
+            <div id="email-step">
+                <h3>Forgot Password</h3>
+                <p>Enter your email address and we'll send you an OTP to reset your password.</p>
+                <form id="forgot-email-form">
+                     <div class="input-group">
+                         <i class="fas fa-envelope"></i>
+                        <input type="email" id="forgot-email" placeholder="Your registered email" required>
+                    </div>
+                    <button type="submit" class="modal-btn">Send OTP</button>
+                </form>
+            </div>
+            <!-- Step 2: Enter OTP -->
+            <div id="otp-step" style="display: none;">
+                <h3>Enter OTP</h3>
+                <p>An OTP has been sent to your email. Please check your inbox (and spam folder).</p>
+                <form id="forgot-otp-form">
+                     <div class="input-group">
+                         <i class="fas fa-key"></i>
+                        <input type="text" id="forgot-otp" placeholder="Enter 6-digit OTP" required maxlength="6">
+                    </div>
+                    <button type="submit" class="modal-btn">Verify OTP</button>
+                </form>
+            </div>
+            <!-- Step 3: Reset Password -->
+            <div id="reset-step" style="display: none;">
+                 <h3>Set New Password</h3>
+                <p>Your OTP is verified. Please set a new password for your account.</p>
+                <form id="forgot-reset-form">
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="new-password" placeholder="New Password" required>
+                        <i class="fas fa-eye-slash eye-icon" data-target="new-password"></i>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="confirm-new-password" placeholder="Confirm New Password" required>
+                         <i class="fas fa-eye-slash eye-icon" data-target="confirm-new-password"></i>
+                    </div>
+                    <button type="submit" class="modal-btn">Reset Password</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div id="toast-container"></div>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="/auth.js"></script>
+    <script src="/login.js"></script>
+</body>
+</html>

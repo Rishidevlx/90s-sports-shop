@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/contact.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Google Identity Services Library -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+  <!-- Navbar -->
+  <header>
+    <nav class="navbar">
+      <div class="logo">
+        <img src="/Asset/logo.png" alt="90s Sports Logo">
+      </div>
+      <ul class="nav-links">
+        <li><a href="/index.html">Home</a></li>
+        <li><a href="/about.html">About</a></li>
+        <li><a href="/shop.html">Shop</a></li>
+        <li><a href="/contact.html">Contact Us</a></li>
+        <li id="cart-nav-item">
+            <a href="/cart.html"><i class="fas fa-shopping-cart"></i></a>
+            <span id="cart-count">0</span>
+        </li>
+        <!-- PUDHU LOGIN LINK (UPDATED) -->
+        <li id="login-nav-link" style="display: none;">
+            <a href="/login.html" class="login-btn-nav">Login</a>
+        </li>
+        
+        <!-- USER PROFILE (UPDATED) -->
+        <li id="user-profile-container" style="display: none;">
+            <img id="user-profile-pic" src="" alt="Profile">
+            <button id="signout-btn">Sign Out</button>
+        </li>
+      </ul>
+      <div class="menu-toggle" id="menu-toggle">
+        <i class="fas fa-bars"></i>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Banner -->
+  <section class="normal-banner">
+    <img src="/Asset/Contact Banner Bat Pose.jpg" alt="Get in Touch Banner">
+  </section>
+
+  <!-- Contact Section -->
+  <section class="contact-container">
+    <div class="form-box">
+      <h2>Get in Touch</h2>
+      <form id="contact-form">
+        <label for="contact-name">Name:</label>
+        <input type="text" id="contact-name" placeholder="Your Name" required>
+        
+        <label for="contact-email">Email:</label>
+        <input type="email" id="contact-email" placeholder="Your Email" required>
+        
+        <label for="contact-phone">Phone:</label>
+        <input type="tel" id="contact-phone" placeholder="Your Phone (Optional)">
+        
+        <label for="contact-subject">Subject:</label>
+        <input type="text" id="contact-subject" placeholder="Subject" required>
+        
+        <label for="contact-message">Message:</label>
+        <textarea id="contact-message" placeholder="Write your message..." required></textarea>
+        
+        <button type="submit" id="submit-btn" class="submit-btn">Send Message</button>
+      </form>
+    </div>
+    <div class="image-box">
+      <img src="/Asset/virat contact us.png" alt="Contact Illustration">
+    </div>
+  </section>
+
+  <!-- Contact Info Cards -->
+  <section class="contact-cards">
+    <div class="card">
+      <i class="fas fa-globe"></i>
+      <h3>Website</h3>
+      <p><a href="https://www.90ssports.com/" target="_blank">www.90ssports.com</a></p>
+    </div>
+    <div class="card">
+      <i class="fas fa-map-marker-alt"></i>
+      <h3>Address</h3>
+      <p>149 Near Guru mobile, Malli</p>
+    </div>
+    <div class="card">
+      <i class="fas fa-phone"></i>
+      <h3>Phone</h3>
+      <p><a href="tel:+919944328298">99443 28298</a></p>
+    </div>
+    <div class="card">
+      <i class="fas fa-envelope"></i>
+      <h3>Email</h3>
+      <p><a href="mailto:ninteessports@gmail.com">nineteessports@gmail.com</a></p>
+    </div>
+  </section>
+
+  <!-- Footer Section -->
+  <footer class="footer">
+    <div class="footer-container">
+        <div class="footer-left">
+          <img src="/Asset/logo.png" alt="Logo" class="footer-logo">
+          <p class="footer-desc">
+            Our shop delivers the best quality products with<br>
+            fast and reliable delivery at your doorstep.
+          </p>
+          <div class="footer-socials">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-whatsapp"></i></a>
+          </div>
+        </div>
+        <div class="footer-links">
+          <h3>Useful Links</h3>
+          <ul>
+            <li><a href="/index.html">Home</a></li>
+            <li><a href="/about.html">About</a></li>
+            <li><a href="/shop.html">Shop</a></li>
+            <li><a href="/contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-contact">
+          <h3>Contact</h3>
+          <p><i class="fas fa-map-marker-alt"></i> Address: 149 Near Guru mobile Malli.</p>
+          <p><i class="fas fa-phone-alt"></i> Hotline: 99443 28298</p>
+          <p><i class="fas fa-envelope"></i> Email: ninteessports@gmail.com</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2025 YourShop. All Rights Reserved.</p>
+      </div>
+  </footer>
+  
+  <script src="/auth.js"></script>
+  <script src="/contact.js"></script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About 90s Sports</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/about.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Google Identity Services Library -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+  <!-- Navbar -->
+  <header>
+    <nav class="navbar">
+      <div class="logo">
+        <img src="/Asset/logo.png" alt="90s Sports Logo">
+      </div>
+      <ul class="nav-links">
+        <li><a href="/index.html">Home</a></li>
+        <li><a href="/about.html">About</a></li>
+        <li><a href="/shop.html">Shop</a></li>
+        <li><a href="/contact.html">Contact Us</a></li>
+        <li id="cart-nav-item">
+            <a href="/cart.html"><i class="fas fa-shopping-cart"></i></a>
+            <span id="cart-count">0</span>
+        </li>
+        <!-- PUDHU LOGIN LINK (UPDATED) -->
+        <li id="login-nav-link" style="display: none;">
+            <a href="/login.html" class="login-btn-nav">Login</a>
+        </li>
+        
+        <!-- USER PROFILE (UPDATED) -->
+        <li id="user-profile-container" style="display: none;">
+            <img id="user-profile-pic" src="" alt="Profile">
+            <button id="signout-btn">Sign Out</button>
+        </li>
+      </ul>
+      <div class="menu-toggle" id="menu-toggle">
+        <i class="fas fa-bars"></i>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Banner -->
+  <section class="normal-banner">
+    <img src="/Asset/abt- pg - banner.jpg" alt="About Us Banner">
+  </section>
+
+  <!-- About Us Section -->
+  <section class="about-us">
+    <div class="about-container">
+      <div class="about-text">
+        <h2>About 90s Sports Shop</h2>
+        <p>At 90s Sports Shop, we believe sports are more than just a game - they are a way of life. That’s why we provide only the best quality sports accessories and make sure your orders are delivered on time without any delay. Your passion for sports deserves the best, and that’s exactly what we bring to you.
+  
+  Our vision is inspired by the 90s, a time when kids didn’t spend their days glued to phones and screens, but instead filled the playgrounds with energy, fun, and real-life sports. We want today’s generation to feel that same excitement to step out, play on the ground, and experience the joy of sports in real life.
+  
+  At 90s Sports Shop, our mission is simple - to bring back the true spirit of sports and make it a part of everyone’s lifestyle again. Because playing on the ground builds not just strength, but also teamwork, discipline, and unforgettable memories.</p>
+      </div>
+      <div class="about-image">
+        <img src="/Asset/abt-_image_1-removebg-preview.png" alt="90s Sports Shop">
+      </div>
+    </div>
+  </section>
+
+  <!-- What We Do Section -->
+  <section class="about-section">
+    <div class="about-container">
+      <div class="about-image">
+        <img src="/Asset/abt_img-removebg-preview.png" alt="Sports Image">
+      </div>
+      <div class="about-content">
+        <h2>WHAT WE DO ?</h2>
+        <p>
+          At <strong>90s Sports Shop</strong>, we bring you the best quality sports accessories with 
+          a promise of <span class="highlight">on-time delivery</span>.  
+          Our vision is to inspire today’s generation to step out of mobile screens 
+          and experience the joy of playing real sports on the ground.  
+          We believe sports can bring energy, teamwork, and happiness back into everyday life.
+        </p>
+        <div class="about-features">
+          <div class="feature-card">
+            <i class="fas fa-trophy"></i>
+            <h3>High Quality Products</h3>
+            <p>We provide strong and durable sports products. Each item is chosen for best use and performance.</p>
+          </div>
+          <div class="feature-card">
+            <i class="fas fa-shipping-fast"></i>
+            <h3>On-Time Delivery</h3>
+            <p>Your orders reach you on time without delay. Play your game without waiting long.</p>
+          </div>
+          <div class="feature-card">
+            <i class="fas fa-futbol"></i>
+            <h3>Sports Spirit</h3>
+            <p>We encourage kids and youth to play outdoors. Sports bring energy, teamwork, and happiness.</p>
+          </div>
+          <div class="feature-card">
+            <i class="fas fa-smile"></i>
+            <h3>Customer Satisfaction</h3>
+            <p>Your happiness is our ultimate victory we value every player’s journey.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer Section -->
+  <footer class="footer">
+    <div class="footer-container">
+        <div class="footer-left">
+          <img src="/Asset/logo.png" alt="Logo" class="footer-logo">
+          <p class="footer-desc">
+            Our shop delivers the best quality products with<br>
+            fast and reliable delivery at your doorstep.
+          </p>
+          <div class="footer-socials">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-whatsapp"></i></a>
+          </div>
+        </div>
+        <div class="footer-links">
+          <h3>Useful Links</h3>
+          <ul>
+            <li><a href="/index.html">Home</a></li>
+            <li><a href="/about.html">About</a></li>
+            <li><a href="/shop.html">Shop</a></li>
+            <li><a href="/contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-contact">
+          <h3>Contact</h3>
+          <p><i class="fas fa-map-marker-alt"></i> Address: 149 Near Guru mobile Malli.</p>
+          <p><i class="fas fa-phone-alt"></i> Hotline: 99443 28298</p>
+          <p><i class="fas fa-envelope"></i> Email: ninteessports@gmail.com</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2025 YourShop. All Rights Reserved.</p>
+      </div>
+  </footer>
+
+  <script src="/script.js"></script>
+  <script src="/about.js"></script>
+  <script src="/auth.js"></script>
+</body>
+</html>

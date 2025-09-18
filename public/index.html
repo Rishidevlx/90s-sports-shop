@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>90s Sports Shop</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header>
+    <nav class="navbar">
+      <div class="logo">
+        <a href="/index.html"><img src="/Asset/logo.png" alt="90s Sports Logo"></a>
+      </div>
+      <ul class="nav-links">
+        <li><a href="/index.html">Home</a></li>
+        <li><a href="/about.html">About</a></li>
+        <li><a href="/shop.html">Shop</a></li>
+        <li><a href="/contact.html">Contact Us</a></li>
+        <li id="cart-nav-item">
+            <a href="/cart.html"><i class="fas fa-shopping-cart"></i></a>
+            <span id="cart-count">0</span>
+        </li>
+        
+        <li id="login-nav-link" style="display: none;">
+            <a href="/login.html" class="login-btn-nav">Login</a>
+        </li>
+        
+        <li id="user-profile-container" style="display: none;">
+            <img id="user-profile-pic" src="" alt="Profile">
+            <button id="signout-btn">Sign Out</button>
+        </li>
+      </ul>
+      <div class="menu-toggle" id="menu-toggle">
+        <i class="fas fa-bars"></i>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Slider -->
+  <div class="slider">
+    <div class="slides">
+      <div class="slide"><img src="/Asset/slider 1.png" alt="Slide 1"></div>
+      <div class="slide"><img src="/Asset/slider 2.png" alt="Slide 2"></div>
+      <div class="slide"><img src="/Asset/sample 1.jpg" alt="Slide 3"></div>
+    </div>
+    <button class="prev">&#10094;</button>
+    <button class="next">&#10095;</button>
+    <div class="dots">
+      <span class="dot active"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+    </div>
+  </div>
+
+  <!-- Latest Products Section -->
+  <section class="latest-products">
+    <h2>Latest Products</h2>
+    <div class="products-container">
+      <div class="product-card" data-product-id="3" data-name="DSC BOUNCER" data-price="1349" data-image="/Asset/DSC BOUNCER.jpeg">
+        <img src="/Asset/DSC BOUNCER.jpeg" alt="DSC BOUNCER">
+        <h3>DSC BOUNCER</h3>
+        <p class="price"><span class="old">₹1,509</span> ₹1,349</p>
+        <button class="add-btn">Add to Cart</button>
+      </div>
+      <div class="product-card" data-product-id="6" data-name="DSC CONDOR PRO" data-price="2999" data-image="/Asset/DSC CONDOR PRO.png">
+        <img src="/Asset/DSC CONDOR PRO.png" alt="DSC CONDOR PRO">
+        <h3>DSC CONDOR PRO</h3>
+        <p class="price"><span class="old">₹3,549</span> ₹2,999</p>
+        <button class="add-btn">Add to Cart</button>
+      </div>
+      <div class="product-card" data-product-id="5" data-name="DSC EDGE PRO" data-price="2019" data-image="/Asset/DSC EDGE PRO.jpeg">
+        <img src="/Asset/DSC EDGE PRO.jpeg" alt="DSC EDGE PRO">
+        <h3>DSC EDGE PRO</h3>
+        <p class="price">₹2,019</p>
+        <button class="add-btn">Add to Cart</button>
+      </div>
+      <div class="product-card" data-product-id="12" data-name="DSC INTENCE PASSION" data-price="3399" data-image="/Asset/DSC INTENCE PASSION.png">
+        <img src="/Asset/DSC INTENCE PASSION.png" alt="DSC INTENCE PASSION">
+        <h3>DSC INTENCE PASSION</h3>
+        <p class="price"><span class="old">₹3,979</span> ₹3,399</p>
+        <button class="add-btn">Add to Cart</button>
+      </div>
+      <div class="product-card" data-product-id="2" data-name="SS ROYAL" data-price="1499" data-image="/Asset/SS ROYAL.png">
+        <img src="/Asset/SS ROYAL.png" alt="SS ROYAL">
+        <h3>SS ROYAL</h3>
+        <p class="price"><span class="old">₹1,780</span> ₹1,499</p>
+        <button class="add-btn">Add to Cart</button>
+      </div>
+      <div class="product-card" data-product-id="1" data-name="SG BLAZETECH" data-price="1299" data-image="/Asset/SG BLAZETECH.png">
+        <img src="/Asset/SG BLAZETECH.png" alt="SG BLAZETECH">
+        <h3>SG BLAZETECH</h3>
+        <p class="price"><span class="old">₹1,449</span> ₹1,299</p>
+        <button class="add-btn">Add to Cart</button>
+      </div>
+      <div class="product-card" data-product-id="7" data-name="SG MEGALITE" data-price="3299" data-image="/Asset/SG MEGALITE.png">
+        <img src="/Asset/SG MEGALITE.png" alt="SG MEGALITE">
+        <h3>SG MEGALITE</h3>
+        <p class="price"><span class="old">₹3,899</span> ₹3,299</p>
+        <button class="add-btn">Add to Cart</button>
+      </div>
+      <div class="product-card" data-product-id="8" data-name="SG TEST WHITE" data-price="4199" data-image="/Asset/SG TEST WHITE.png">
+        <img src="/Asset/SG TEST WHITE.png" alt="SG TEST WHITE">
+        <h3>SG TEST WHITE</h3>
+        <p class="price"><span class="old">₹4,899</span> ₹4,199</p>
+        <button class="add-btn">Add to Cart</button>
+      </div>
+    </div>
+    <div class="view-more">
+      <a href="/shop.html"><button>View More Products</button></a>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="feature-box">
+      <i class="fas fa-box-open"></i>
+      <h3>Wide Range of Products</h3>
+      <p>From cricket bats to football shoes, explore top-quality sports gear under one roof.</p>
+    </div>
+    <div class="feature-box">
+      <i class="fas fa-truck-fast"></i>
+      <h3>Fast & Secure Delivery</h3>
+      <p>Get your favorite sports equipment delivered quickly with safe packaging.</p>
+    </div>
+    <div class="feature-box">
+      <i class="fas fa-headset"></i>
+      <h3>Customer Support 24/7</h3>
+      <p>Our team is ready to assist you anytime for product queries or orders.</p>
+    </div>
+  </section>
+
+  <!-- Footer Section -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-left">
+        <img src="/Asset/logo.png" alt="Logo" class="footer-logo">
+        <p class="footer-desc">
+          Our shop delivers the best quality products with<br>
+          fast and reliable delivery at your doorstep.
+        </p>
+        <div class="footer-socials">
+          <a href="#"><i class="fab fa-facebook-f"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-whatsapp"></i></a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <h3>Useful Links</h3>
+        <ul>
+          <li><a href="/index.html">Home</a></li>
+          <li><a href="/about.html">About</a></li>
+          <li><a href="/shop.html">Shop</a></li>
+          <li><a href="/contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-contact">
+        <h3>Contact</h3>
+        <p><i class="fas fa-map-marker-alt"></i> Address: 149 Near Guru mobile Malli.</p>
+        <p><i class="fas fa-phone-alt"></i> Hotline: 99443 28298</p>
+        <p><i class="fas fa-envelope"></i> Email: ninteessports@gmail.com</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 YourShop. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <div id="toast-container"></div>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="/script.js"></script>
+  <script src="/auth.js"></script>
+</body>
+</html>

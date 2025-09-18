@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - 90s Sports</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/cart.css"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <a href="/index.html"><img src="/Asset/logo.png" alt="90s Sports Logo"></a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/index.html">Home</a></li>
+                <li><a href="/about.html">About</a></li>
+                <li><a href="/shop.html">Shop</a></li>
+                <li><a href="/contact.html">Contact Us</a></li>
+                <li id="cart-nav-item">
+                    <a href="/cart.html"><i class="fas fa-shopping-cart"></i></a>
+                    <span id="cart-count">0</span>
+                </li>
+                <li id="login-nav-link" style="display: none;">
+                    <a href="/login.html" class="login-btn-nav">Login</a>
+                </li>
+                <li id="user-profile-container" style="display: none;">
+                    <img id="user-profile-pic" src="" alt="Profile">
+                    <button id="signout-btn">Sign Out</button>
+                </li>
+            </ul>
+            <div class="menu-toggle" id="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </nav>
+    </header>
+
+    <main class="cart-page-container">
+        <!-- Left Section - Cart Items -->
+        <section class="cart-items-section">
+            <h1>Shopping Cart</h1>
+            <div id="cart-items-container">
+                <!-- Cart items will be loaded here by JS -->
+            </div>
+        </section>
+
+        <!-- Right Section - Checkout -->
+        <aside class="checkout-section">
+            <div id="checkout-summary" class="checkout-summary">
+                <!-- Checkout summary will be loaded here by JS -->
+            </div>
+            <div id="related-products-container" class="related-products-container">
+                <!-- Related products will be loaded here by JS -->
+            </div>
+        </aside>
+    </main>
+
+    <!-- Product Modal (Same as Shop Page) -->
+    <div id="product-modal" class="product-modal" style="display: none;">
+        <div class="product-modal-overlay"></div>
+        <div class="modal-content">
+            <button class="close-modal-btn">&times;</button>
+            <div class="modal-body">
+                <div class="modal-image-container">
+                    <img id="modal-image" src="" alt="Product Image">
+                </div>
+                <div class="modal-details-container">
+                    <h2 id="modal-title">Product Title</h2>
+                    <div class="modal-rating" id="modal-rating-stars"></div>
+                    <div class="modal-price">
+                        <span id="modal-original-price" class="original-price"></span>
+                        <span id="modal-discount-price" class="current-price"></span>
+                    </div>
+                    <p id="modal-description"></p>
+                    <div class="modal-buttons-container">
+                         <button class="add-to-cart-btn-modal"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
+                         <button class="buy-now-btn-modal"><i class="fas fa-bolt"></i> Buy Now</button>
+                    </div>
+                    <div class="comments-section">
+                        <h4 class="comments-toggle">View Reviews <i class="fas fa-chevron-down"></i></h4>
+                        <div class="comments-content" style="display:none;">
+                            <div id="comments-list"></div>
+                            <div id="add-comment-container"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- LOGIN POP-UP -->
+    <div id="login-modal" class="login-modal" style="display: none;">
+        <div class="login-modal-overlay"></div>
+        <div class="login-modal-content">
+            <button class="close-login-modal-btn">&times;</button>
+            <i class="fas fa-exclamation-triangle login-modal-icon"></i>
+            <h3>Authentication Required</h3>
+            <p>Please log in to proceed with your order.</p>
+            <a href="/login.html" class="go-to-login-btn">Go to Login</a>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+    <script src="/auth.js"></script>
+    <script src="/cart.js"></script>
+</body>
+</html>

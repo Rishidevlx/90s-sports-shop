@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - 90s Sports</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/admin_dashboard.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="/Asset/logo.png" alt="Logo">
+                <h3>Admin Panel</h3>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item" data-target="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</li>
+                    <li class="nav-item" data-target="products"><i class="fas fa-box-open"></i> Products</li>
+                    <li class="nav-item" data-target="orders"><i class="fas fa-shopping-cart"></i> Orders</li>
+                    <li class="nav-item" data-target="reviews"><i class="fas fa-star"></i> Reviews</li>
+                    <li class="nav-item" data-target="users"><i class="fas fa-users"></i> Users</li>
+                    <li class="nav-item" id="admin-logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content" id="main-content">
+            <!-- Content will be loaded here by JavaScript -->
+        </main>
+    </div>
+
+    <!-- Add/Edit Product Modal -->
+    <div id="product-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-modal-btn">&times;</span>
+            <h2 id="modal-title">Add New Product</h2>
+            <form id="product-form">
+                <input type="hidden" id="product-id">
+                <div class="form-group">
+                    <label for="product-name">Product Name</label>
+                    <input type="text" id="product-name" required>
+                </div>
+                 <div class="form-group">
+                    <label for="product-brand">Brand</label>
+                    <input type="text" id="product-brand" placeholder="e.g., SG, SS, DSC">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="product-regularPrice">Regular Price</label>
+                        <input type="number" id="product-regularPrice" placeholder="e.g., 1500">
+                    </div>
+                    <div class="form-group">
+                        <label for="product-discountPrice">Discount Price</label>
+                        <input type="number" id="product-discountPrice" required placeholder="e.g., 1299">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="product-category">Category</label>
+                        <input type="text" id="product-category" required placeholder="e.g., Bat, Ball">
+                    </div>
+                     <div class="form-group">
+                        <label for="product-stock">Stock</label>
+                        <input type="number" id="product-stock" required placeholder="e.g., 50">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="product-imageUrl">Image URL</label>
+                    <input type="text" id="product-imageUrl" required placeholder="e.g., /Asset/product.png">
+                </div>
+                <div class="form-group">
+                    <label for="product-description">Description</label>
+                    <textarea id="product-description" rows="4"></textarea>
+                </div>
+                <button type="submit" id="save-product-btn">Save Product</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="toast-container"></div>
+    
+    <script src="/admin_dashboard.js"></script>
+</body>
+</html>

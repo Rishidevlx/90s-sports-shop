@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - 90s Sports</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/checkout.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <a href="/index.html"><img src="/Asset/logo.png" alt="90s Sports Logo"></a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/index.html">Home</a></li>
+                <li><a href="/about.html">About</a></li>
+                <li><a href="/shop.html">Shop</a></li>
+                <li><a href="/contact.html">Contact Us</a></li>
+                <li id="cart-nav-item">
+                    <a href="/cart.html"><i class="fas fa-shopping-cart"></i></a>
+                    <span id="cart-count">0</span>
+                </li>
+                <li id="google-signin-btn-container"></li>
+                <li id="user-profile-container" style="display: none;">
+                    <img id="user-profile-pic" src="" alt="User">
+                    <button id="signout-btn">Sign Out</button>
+                </li>
+            </ul>
+            <div class="menu-toggle" id="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </nav>
+    </header>
+
+    <main class="checkout-container">
+        <div class="checkout-progress-bar">
+            <div class="step active"><span>SHOPPING CART</span></div>
+            <div class="step active"><span>CHECKOUT</span></div>
+            <div class="step"><span>ORDER COMPLETE</span></div>
+        </div>
+
+        <div class="checkout-layout">
+            <!-- Left Side: Billing Details -->
+            <div class="billing-details">
+                <h2>Billing Details</h2>
+                <form id="checkout-form" novalidate>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">First name *</label>
+                            <input type="text" id="firstName" required>
+                            <div class="error-message"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last name *</label>
+                            <input type="text" id="lastName" required>
+                            <div class="error-message"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Street address *</label>
+                        <input type="text" id="address" placeholder="House number and street name" required>
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="city">Town / City *</label>
+                        <input type="text" id="city" required>
+                         <div class="error-message"></div>
+                    </div>
+                     <div class="form-row">
+                        <div class="form-group">
+                            <label for="state">State *</label>
+                            <input type="text" id="state" value="Tamil Nadu" required>
+                            <div class="error-message"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="pincode">PIN Code *</label>
+                            <input type="tel" id="pincode" pattern="^\d{6}$" title="Please enter a 6-digit PIN code" required>
+                            <div class="error-message"></div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone">Phone *</label>
+                            <input type="tel" id="phone" pattern="^\d{10}$" title="Please enter a 10-digit mobile number" required>
+                            <div class="error-message"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email address *</label>
+                            <input type="email" id="email" required>
+                            <div class="error-message"></div>
+                        </div>
+                    </div>
+                </form>
+                
+                <!-- NEW: Delivery & Return Section -->
+                <div class="delivery-return-section">
+                    <h2>Delivery & Return</h2>
+                    <div class="accordion">
+                        <div class="accordion-item">
+                            <button class="accordion-header">My order hasn't arrived yet. Where is it?</button>
+                            <div class="accordion-content">
+                                <p>Once your order is shipped, you will receive an email with tracking details. You can use this to track your order's journey. Deliveries usually take 3-5 business days.</p>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <button class="accordion-header">Do you deliver on public holidays?</button>
+                            <div class="accordion-content">
+                                <p>We do not deliver on public holidays. Your order will be delivered on the next business day.</p>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <button class="accordion-header">Is next-day delivery available on all orders?</button>
+                            <div class="accordion-content">
+                                <p>Next-day delivery is available for select locations and products. This option will be shown at checkout if available for your address.</p>
+                            </div>
+                        </div>
+                         <div class="accordion-item">
+                            <button class="accordion-header">What is your return policy?</button>
+                            <div class="accordion-content">
+                                <p>We offer a 7-day return policy for unused products in their original packaging. Please visit our 'Returns' page for more details on how to initiate a return.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Side: Order Summary -->
+            <div class="order-summary">
+                <h2>Your Order</h2>
+                <div id="order-items-container">
+                    <!-- Order items will be injected here -->
+                </div>
+                <div class="order-totals">
+                    <div class="total-line">
+                        <span>Subtotal</span>
+                        <span id="subtotal-amount">₹0</span>
+                    </div>
+                    <div class="total-line">
+                        <span>Shipping</span>
+                        <span id="shipping-amount">₹0</span>
+                    </div>
+                    <div class="total-line grand-total">
+                        <span>Total</span>
+                        <span id="total-amount">₹0</span>
+                    </div>
+                </div>
+                
+                <!-- UPDATED: Payment Information Section -->
+                <div class="payment-method">
+                    <h3>Payment Information</h3>
+                    <div class="payment-options">
+                        <div class="payment-option">
+                            <input type="radio" id="cod" name="payment" value="Cash on Delivery" checked>
+                            <label for="cod">Cash on Delivery</label>
+                        </div>
+                        <div class="payment-option">
+                            <input type="radio" id="upi" name="payment" value="UPI">
+                            <label for="upi">UPI / QR Code</label>
+                        </div>
+                        <div class="payment-option">
+                            <input type="radio" id="card" name="payment" value="Card">
+                            <label for="card">Credit / Debit Card</label>
+                        </div>
+                    </div>
+                    <div id="payment-details-container">
+                        <!-- Content changes based on selection -->
+                        <div id="cod-details" class="payment-details active">
+                            <p>Pay with cash upon delivery.</p>
+                        </div>
+                        <div id="upi-details" class="payment-details">
+                            <p>Scan the QR code with your UPI app.</p>
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=90ssports@okhdfcbank" alt="UPI QR Code" class="qr-code">
+                        </div>
+                        <div id="card-details" class="payment-details">
+                            <p>Card payments are currently unavailable. Please choose another method.</p>
+                        </div>
+                    </div>
+                     <p class="privacy-policy">Your personal data will be used to process your order and support your experience throughout this website.</p>
+                </div>
+                
+                <button type="submit" form="checkout-form" id="place-order-btn" class="place-order-btn">
+                    <span class="btn-text">Place Order</span>
+                    <span class="spinner" style="display: none;"></span>
+                </button>
+            </div>
+        </div>
+    </main>
+    
+    <div id="toast-container"></div>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="/auth.js"></script>
+    <script src="/checkout.js"></script>
+</body>
+</html>

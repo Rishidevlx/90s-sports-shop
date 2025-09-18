@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed - 90s Sports</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/order-confirmation.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <header>
+        <nav class="navbar">
+            <div class="logo"><a href="/index.html"><img src="/Asset/logo.png" alt="90s Sports Logo"></a></div>
+            <ul class="nav-links">
+                <li><a href="/index.html">Home</a></li>
+                <li><a href="/about.html">About</a></li>
+                <li><a href="/shop.html">Shop</a></li>
+                <li><a href="/contact.html">Contact Us</a></li>
+            </ul>
+            <div class="menu-toggle" id="menu-toggle"><i class="fas fa-bars"></i></div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="confirmation-container" id="printable-invoice-area">
+        <div class="confirmation-header">
+            <i class="fas fa-check-circle success-icon"></i>
+            <h1>Thank You For Your Order!</h1>
+            <p>Your order <strong id="order-id-display"></strong> has been placed successfully.</p>
+        </div>
+
+        <div class="order-details-layout">
+            <div class="order-summary-card">
+                <h3>Order Summary</h3>
+                <div id="order-items-container"><div class="loader"></div></div>
+                <div class="order-totals">
+                    <div class="total-line"><span>Subtotal</span><span id="subtotal-amount">--</span></div>
+                    <div class="total-line"><span>Shipping</span><span id="shipping-amount">--</span></div>
+                    <div class="total-line grand-total"><span>Total</span><span id="total-amount">--</span></div>
+                </div>
+            </div>
+            <div class="customer-info-card">
+                <h3>Shipping Information</h3>
+                <div id="shipping-details-container"><div class="loader"></div></div>
+            </div>
+        </div>
+    </main>
+    
+    <div class="confirmation-footer">
+        <p>You'll receive a confirmation email soon. Thanks for shopping with us!</p>
+        <div class="action-buttons">
+            <button id="print-invoice-btn" class="action-btn print-btn" disabled>
+                <i class="fas fa-print"></i> Print Invoice
+            </button>
+            <button id="download-pdf-btn" class="action-btn pdf-btn" disabled>
+                <i class="fas fa-file-pdf"></i> Download PDF
+            </button>
+            <a href="/shop.html" class="action-btn continue-btn">
+                <i class="fas fa-shopping-bag"></i> Continue Shopping
+            </a>
+        </div>
+    </div>
+
+    <!-- PDF Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    
+    <!-- Page-Specific Logic -->
+    <script src="/order-confirmation.js"></script>
+</body>
+</html>
