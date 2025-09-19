@@ -1,5 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    // --- API BASE URL LOGIC (Important for Deployment) ---
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const API_BASE_URL = isLocalhost ? 'http://localhost:3000' : 'https://ninetiessportsshop.onrender.com'; // <-- FINAL CORRECTION INGA THAAN!
+
     // --- DOM ELEMENTS ---
     const orderItemsContainer = document.getElementById('order-items-container');
     const subtotalAmountEl = document.getElementById('subtotal-amount');
@@ -21,12 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!userProfile) {
         alert("Please sign in to proceed to checkout.");
-        window.location.href = 'shop.html';
+        window.location.href = '/shop.html';
         return;
     }
     if (!cartForCheckout || cartForCheckout.length === 0) {
         alert("Your cart is empty. Please add items to proceed.");
-        window.location.href = 'shop.html';
+        window.location.href = '/shop.html';
         return;
     }
     
@@ -119,7 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            const response = await fetch('http://localhost:3000/api/place-order', {
+            // Intha line thaan maathiruken
+            const response = await fetch(`${API_BASE_URL}/api/place-order`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(orderPayload)
@@ -132,14 +137,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (buyNowItemStr) {
                 sessionStorage.removeItem('buyNowItem');
             } else {
-                localStorage.removeItem('shoppingCart');
+                // Corrected cart key for user-specific cart
+                const userProfile = JSON.parse(localStorage.getItem('userProfile'));
+                const cartKey = userProfile ? `cart_${userProfile.email}` : 'cart_guest';
+                localStorage.removeItem(cartKey);
+
                 if(typeof window.updateCartDisplay === 'function') {
                     window.updateCartDisplay();
                 }
             }
             
             localStorage.setItem('lastOrderId', result.orderId);
-            window.location.href = 'order-confirmation.html';
+            window.location.href = '/order-confirmation.html';
 
         } catch (error) {
             console.error('Order placement error:', error);
