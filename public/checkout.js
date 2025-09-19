@@ -1,8 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- API BASE URL LOGIC (Important for Deployment) ---
+    // ITHU THAAN MUKKIYAMANA MAATRAM. Ippo Render la correct ah work aagum.
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const API_BASE_URL = isLocalhost ? 'http://localhost:3000' : 'https://ninetiessportsshop.onrender.com'; // <-- FINAL CORRECTION INGA THAAN!
+    const API_BASE_URL = isLocalhost ? 'http://localhost:3000' : '';
 
     // --- DOM ELEMENTS ---
     const orderItemsContainer = document.getElementById('order-items-container');
@@ -24,12 +25,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (!userProfile) {
-        alert("Please sign in to proceed to checkout.");
-        window.location.href = '/shop.html';
+        // Using a custom modal or redirect is better than alert
+        console.error("User not logged in. Redirecting...");
+        window.location.href = '/login.html';
         return;
     }
     if (!cartForCheckout || cartForCheckout.length === 0) {
-        alert("Your cart is empty. Please add items to proceed.");
+        console.error("Cart is empty. Redirecting...");
         window.location.href = '/shop.html';
         return;
     }
@@ -49,7 +51,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('input[name="payment"]').forEach(radio => {
         radio.addEventListener('change', (event) => {
             document.querySelectorAll('.payment-details').forEach(div => div.classList.remove('active'));
-            document.getElementById(`${event.target.id}-details`).classList.add('active');
+            const detailsDiv = document.getElementById(`${event.target.id}-details`);
+            if (detailsDiv) {
+                detailsDiv.classList.add('active');
+            }
         });
     });
     
@@ -64,13 +69,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- FUNCTIONS ---
     
     function populateUserDetails(profile) {
-        document.getElementById('email').value = profile.email || '';
+        if(document.getElementById('email')) document.getElementById('email').value = profile.email || '';
         const [firstName, ...lastNameParts] = (profile.name || '').split(' ');
-        document.getElementById('firstName').value = firstName;
-        document.getElementById('lastName').value = lastNameParts.join(' ');
+        if(document.getElementById('firstName')) document.getElementById('firstName').value = firstName;
+        if(document.getElementById('lastName')) document.getElementById('lastName').value = lastNameParts.join(' ');
     }
 
     function renderOrderSummary(currentCart) {
+        if(!orderItemsContainer) return;
         orderItemsContainer.innerHTML = '';
         let subtotal = 0;
         currentCart.forEach(item => {
@@ -91,9 +97,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const shippingFee = subtotal > 5000 ? 0 : 50;
         const totalAmount = subtotal + shippingFee;
-        subtotalAmountEl.textContent = `₹${subtotal.toLocaleString()}`;
-        shippingAmountEl.textContent = shippingFee === 0 ? 'FREE' : `₹${shippingFee.toLocaleString()}`;
-        totalAmountEl.textContent = `₹${totalAmount.toLocaleString()}`;
+        if(subtotalAmountEl) subtotalAmountEl.textContent = `₹${subtotal.toLocaleString()}`;
+        if(shippingAmountEl) shippingAmountEl.textContent = shippingFee === 0 ? 'FREE' : `₹${shippingFee.toLocaleString()}`;
+        if(totalAmountEl) totalAmountEl.textContent = `₹${totalAmount.toLocaleString()}`;
     }
 
     async function handlePlaceOrder(event) {
@@ -106,24 +112,16 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleButtonLoading(true);
 
         const orderPayload = {
-            userDetails: {
-                email: document.getElementById('email').value,
-                firstName: document.getElementById('firstName').value,
-                lastName: document.getElementById('lastName').value,
-                phone: document.getElementById('phone').value,
-            },
-            shippingAddress: {
-                address: document.getElementById('address').value,
-                city: document.getElementById('city').value,
-                state: document.getElementById('state').value,
-                pincode: document.getElementById('pincode').value,
-            },
-            orderItems: cartForCheckout,
-            paymentMethod: document.querySelector('input[name="payment"]:checked').value
+            userId: userProfile.id, // We need user ID
+            customerName: `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`,
+            shippingAddress: `${document.getElementById('address').value}, ${document.getElementById('city').value}, ${document.getElementById('state').value} - ${document.getElementById('pincode').value}`,
+            phone: document.getElementById('phone').value,
+            items: cartForCheckout,
+            totalAmount: cartForCheckout.reduce((sum, item) => sum + (item.price * item.quantity), 0) + (cartForCheckout.reduce((sum, item) => sum + (item.price * item.quantity), 0) > 5000 ? 0 : 50)
         };
-
+        
         try {
-            // Intha line thaan maathiruken
+            // Intha line ippo correct ah request anupum
             const response = await fetch(`${API_BASE_URL}/api/place-order`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -137,14 +135,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (buyNowItemStr) {
                 sessionStorage.removeItem('buyNowItem');
             } else {
-                // Corrected cart key for user-specific cart
-                const userProfile = JSON.parse(localStorage.getItem('userProfile'));
-                const cartKey = userProfile ? `cart_${userProfile.email}` : 'cart_guest';
-                localStorage.removeItem(cartKey);
-
-                if(typeof window.updateCartDisplay === 'function') {
-                    window.updateCartDisplay();
-                }
+                const cartKey = `cart_${userProfile.email}`;
+                localStorage.setItem(cartKey, JSON.stringify([])); // Clear user specific cart
+            }
+            
+            if(typeof window.updateCartDisplay === 'function') {
+                window.updateCartDisplay();
             }
             
             localStorage.setItem('lastOrderId', result.orderId);
@@ -186,16 +182,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function toggleButtonLoading(isLoading) {
+        if(!placeOrderBtn) return;
         const btnText = placeOrderBtn.querySelector('.btn-text');
         const spinner = placeOrderBtn.querySelector('.spinner');
         placeOrderBtn.disabled = isLoading;
-        btnText.style.display = isLoading ? 'none' : 'inline-block';
-        spinner.style.display = isLoading ? 'inline-block' : 'none';
+        if(btnText) btnText.style.display = isLoading ? 'none' : 'inline-block';
+        if(spinner) spinner.style.display = isLoading ? 'inline-block' : 'none';
     }
     
     function showToast(message) {
-        const toastContainer = document.getElementById('toast-container');
-        if (!toastContainer) return;
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            document.body.appendChild(toastContainer);
+        }
         const toast = document.createElement('div');
         toast.className = 'toast';
         toast.textContent = message;
@@ -206,4 +207,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 4500);
     }
 });
-
