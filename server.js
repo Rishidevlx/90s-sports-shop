@@ -4,8 +4,7 @@ const mysql = require('mysql2/promise');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
-const nodemailer = require('nodemailer');
-const sgTransport = require('nodemailer-sendgrid-transport');
+const sgMail = require('@sendgrid/mail'); // Using the modern SendGrid package
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
@@ -16,11 +15,8 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(bodyParser.json());
-
-// --- SERVE FRONTEND STATIC FILES ---
-// NOTE: All your frontend files (HTML, CSS, JS, Assets) must be inside a 'public' folder for deployment.
+// Serve frontend files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
-
 
 // --- DATABASE CONNECTION POOL ---
 const dbConfig = {
@@ -29,39 +25,37 @@ const dbConfig = {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    port: process.env.DB_PORT || 3306,
+    port: process.env.DB_PORT || 4000,
     ssl: {
-        ca: process.env.DB_SSL_CA_PATH ? fs.readFileSync(process.env.DB_SSL_CA_PATH) : null
+        // Correctly read the certificate file for Render deployment
+        ca: process.env.DB_SSL_CA_PATH ? fs.readFileSync(path.join(__dirname, process.env.DB_SSL_CA_PATH)) : undefined
     }
 };
-
 const db = mysql.createPool(dbConfig);
 console.log('MySQL Database Connection Pool Created.');
 
-
 // --- SENDGRID EMAIL SETUP ---
-const options = {
-    auth: {
-        api_key: process.env.SENDGRID_API_KEY
-    }
-}
-const transporter = nodemailer.createTransport(sgTransport(options));
-console.log('Nodemailer transporter configured for SendGrid.');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+console.log('SendGrid Mail configured.');
+
 
 // ===================================
 // ========== API ROUTES =============
 // ===================================
 
-// --- USER & AUTHENTICATION API's ---
+// --- USER & AUTHENTICATION APIs ---
 app.post('/api/register', async (req, res) => {
     try {
         const { name, email, phone, password } = req.body;
         const [existingUsers] = await db.query('SELECT email FROM users WHERE email = ? OR phone = ?', [email, phone]);
-        if (existingUsers.length > 0) return res.status(409).json({ message: 'Account with this email or phone already exists.' });
+        if (existingUsers.length > 0) {
+            return res.status(409).json({ message: 'Account with this email or phone already exists.' });
+        }
         
         const hashedPassword = await bcrypt.hash(password, 8);
-        await db.query('INSERT INTO users SET ?', { name, email, phone, password: hashedPassword, role: 'user' });
-        res.status(201).json({ message: 'User registered successfully!', user: { name, email, picture: null } });
+        const [result] = await db.query('INSERT INTO users SET ?', { name, email, phone, password: hashedPassword, role: 'user' });
+        const newUser = { id: result.insertId, name, email, picture: null };
+        res.status(201).json({ message: 'User registered successfully!', user: newUser });
     } catch (error) {
         console.error("REGISTER ERROR:", error);
         res.status(500).json({ message: 'Database error during registration.' });
@@ -72,15 +66,19 @@ app.post('/api/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
-        if (users.length === 0) return res.status(401).json({ message: 'Incorrect email or password.' });
+        if (users.length === 0) {
+            return res.status(401).json({ message: 'Incorrect email or password.' });
+        }
         
         const user = users[0];
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(401).json({ message: 'Incorrect email or password.' });
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Incorrect email or password.' });
+        }
         
         res.json({ 
             message: 'Login successful', 
-            user: { name: user.name, email: user.email },
+            user: { id: user.id, name: user.name, email: user.email, picture: user.picture },
             role: user.role
         });
     } catch (error) {
@@ -93,7 +91,7 @@ app.get('/api/user', async (req, res) => {
     const { email } = req.query;
     if (!email) return res.status(400).json({ message: 'Email is required' });
     try {
-        const [users] = await db.query('SELECT name, email, phone, dob FROM users WHERE email = ?', [email]);
+        const [users] = await db.query('SELECT id, name, email, phone, dob FROM users WHERE email = ?', [email]);
         if (users.length === 0) return res.status(404).json({ message: 'User not found' });
         res.json(users[0]);
     } catch (error) {
@@ -103,20 +101,16 @@ app.get('/api/user', async (req, res) => {
 
 app.put('/api/user', async (req, res) => {
     const { name, phone, dob, originalEmail } = req.body;
-    let newDob = dob;
-    if (dob === '' || dob === null) {
-        newDob = null;
-    }
+    let newDob = dob === '' || dob === null ? null : dob;
     try {
         await db.query('UPDATE users SET name = ?, phone = ?, dob = ? WHERE email = ?', [name, phone, newDob, originalEmail]);
-        const updatedUser = { name, email: originalEmail, phone, dob };
-        res.json({ message: 'Profile updated successfully!', user: updatedUser });
+        const [updatedUsers] = await db.query('SELECT id, name, email, phone, dob, picture FROM users WHERE email = ?', [originalEmail]);
+        res.json({ message: 'Profile updated successfully!', user: updatedUsers[0] });
     } catch (error) {
         console.error("PROFILE UPDATE ERROR:", error);
         res.status(500).json({ message: 'Failed to update profile' });
     }
 });
-
 
 app.post('/api/change-password', async (req, res) => {
     const { email, currentPassword, newPassword } = req.body;
@@ -137,24 +131,21 @@ app.post('/api/change-password', async (req, res) => {
 });
 
 
-// --- ADMIN API's ---
+// --- ADMIN APIs ---
 app.get('/api/admin/stats', async (req, res) => {
     try {
         const [revenueResult] = await db.query("SELECT SUM(total_amount) AS totalRevenue FROM orders WHERE status = 'Delivered'");
         const [ordersResult] = await db.query("SELECT COUNT(*) AS totalOrders FROM orders");
         const [productsResult] = await db.query("SELECT COUNT(*) AS totalProducts FROM products");
-
         res.json({
             totalRevenue: revenueResult[0].totalRevenue || 0,
             totalOrders: ordersResult[0].totalOrders || 0,
             totalProducts: productsResult[0].totalProducts || 0
         });
     } catch (error) {
-        console.error("STATS FETCH ERROR:", error);
         res.status(500).json({ message: 'Failed to fetch dashboard stats' });
     }
 });
-
 
 app.get('/api/admin/products', async (req, res) => {
     try {
@@ -165,101 +156,14 @@ app.get('/api/admin/products', async (req, res) => {
     }
 });
 
-app.get('/api/admin/orders', async (req, res) => {
-    try {
-        const [orders] = await db.query(`
-            SELECT 
-                o.id, o.user_email, o.customer_name, o.user_phone, o.shipping_address, 
-                o.total_amount, o.payment_method, o.status, o.created_at
-            FROM orders o 
-            ORDER BY o.created_at DESC
-        `);
-        res.json(orders);
-    } catch (error) {
-        console.error("ADMIN ORDERS FETCH ERROR:", error);
-        res.status(500).json({ message: 'Failed to fetch orders for admin' });
-    }
-});
-
-app.put('/api/admin/orders/:id/status', async (req, res) => {
-    const { id } = req.params;
-    const { status } = req.body;
-    try {
-        await db.query('UPDATE orders SET status = ? WHERE id = ?', [status, id]);
-        res.json({ message: `Order #${id} status updated to ${status}` });
-    } catch (error) {
-        console.error(`Error updating status for order ${id}:`, error);
-        res.status(500).json({ message: 'Failed to update order status' });
-    }
-});
-
-app.get('/api/admin/reviews', async (req, res) => {
-    try {
-        const [reviews] = await db.query(`
-            SELECT c.id, c.user_name, c.rating, c.comment_text, c.created_at, p.name AS product_name
-            FROM comments c
-            JOIN products p ON c.product_id = p.id
-            ORDER BY c.created_at DESC
-        `);
-        res.json(reviews);
-    } catch (error) {
-        console.error("ADMIN REVIEWS FETCH ERROR:", error);
-        res.status(500).json({ message: 'Failed to fetch reviews' });
-    }
-});
-
-app.delete('/api/admin/reviews/:id', async (req, res) => {
-    const { id } = req.params;
-    try {
-        const [result] = await db.query('DELETE FROM comments WHERE id = ?', [id]);
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Review not found.' });
-        }
-        res.json({ message: 'Review deleted successfully.' });
-    } catch (error) {
-        console.error(`Error deleting review ${id}:`, error);
-        res.status(500).json({ message: 'Failed to delete review.' });
-    }
-});
-
-app.get('/api/admin/users', async (req, res) => {
-    try {
-        const [users] = await db.query(`
-            SELECT id, name, email, phone, role, created_at 
-            FROM users 
-            ORDER BY created_at DESC
-        `);
-        res.json(users);
-    } catch (error) {
-        console.error("ADMIN USERS FETCH ERROR:", error);
-        res.status(500).json({ message: 'Failed to fetch users' });
-    }
-});
-
-
 app.post('/api/admin/products', async (req, res) => {
     try {
         const { name, regularPrice, discountPrice, category, stock, imageUrl, description, brand } = req.body;
-        
-        if (!name || !discountPrice || !category || !imageUrl) {
-            return res.status(400).json({ message: 'Name, Discount Price, Category, and Image URL are required.' });
-        }
-
-        const newProduct = { 
-            name, 
-            regularPrice: regularPrice || null, 
-            discountPrice, 
-            category, 
-            stock: stock || 0,
-            imageUrl, 
-            description: description || '',
-            brand: brand || 'N/A'
-        };
+        const newProduct = { name, regularPrice: regularPrice || null, discountPrice, category, stock: stock || 0, imageUrl, description: description || '', brand: brand || 'N/A' };
         await db.query('INSERT INTO products SET ?', newProduct);
         res.status(201).json({ message: 'Product added successfully!' });
     } catch (error) {
-        console.error('ADD PRODUCT ERROR:', error);
-        res.status(500).json({ message: 'Failed to add product. Check database constraints.' });
+        res.status(500).json({ message: 'Failed to add product.' });
     }
 });
 
@@ -267,26 +171,11 @@ app.put('/api/admin/products/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const { name, regularPrice, discountPrice, category, stock, imageUrl, description, brand } = req.body;
-
-        if (!name || !discountPrice || !category || !imageUrl) {
-            return res.status(400).json({ message: 'Name, Discount Price, Category, and Image URL are required.' });
-        }
-        
-        const updatedProduct = { 
-            name, 
-            regularPrice: regularPrice || null, 
-            discountPrice, 
-            category, 
-            stock: stock || 0,
-            imageUrl, 
-            description: description || '',
-            brand: brand || 'N/A' 
-        };
+        const updatedProduct = { name, regularPrice: regularPrice || null, discountPrice, category, stock: stock || 0, imageUrl, description: description || '', brand: brand || 'N/A' };
         await db.query('UPDATE products SET ? WHERE id = ?', [updatedProduct, id]);
         res.json({ message: 'Product updated successfully!' });
     } catch (error) {
-        console.error('UPDATE PRODUCT ERROR:', error);
-        res.status(500).json({ message: 'Failed to update product. Check database constraints.' });
+        res.status(500).json({ message: 'Failed to update product.' });
     }
 });
 
@@ -300,12 +189,60 @@ app.delete('/api/admin/products/:id', async (req, res) => {
     }
 });
 
+app.get('/api/admin/orders', async (req, res) => {
+    try {
+        const [orders] = await db.query(`SELECT id, user_email, customer_name, user_phone, shipping_address, total_amount, payment_method, status, created_at FROM orders ORDER BY created_at DESC`);
+        res.json(orders);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch orders for admin' });
+    }
+});
 
-// --- PUBLIC E-COMMERCE API's ---
+app.put('/api/admin/orders/:id/status', async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+    try {
+        await db.query('UPDATE orders SET status = ? WHERE id = ?', [status, id]);
+        res.json({ message: `Order #${id} status updated to ${status}` });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to update order status' });
+    }
+});
+
+app.get('/api/admin/reviews', async (req, res) => {
+    try {
+        const [reviews] = await db.query(`SELECT c.id, c.user_name, c.rating, c.comment_text, c.created_at, p.name AS product_name FROM comments c JOIN products p ON c.product_id = p.id ORDER BY c.created_at DESC`);
+        res.json(reviews);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch reviews' });
+    }
+});
+
+app.delete('/api/admin/reviews/:id', async (req, res) => {
+    try {
+        await db.query('DELETE FROM comments WHERE id = ?', [req.params.id]);
+        res.json({ message: 'Review deleted successfully.' });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to delete review.' });
+    }
+});
+
+app.get('/api/admin/users', async (req, res) => {
+    try {
+        const [users] = await db.query(`SELECT id, name, email, phone, role, created_at FROM users ORDER BY created_at DESC`);
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch users' });
+    }
+});
+
+// --- E-COMMERCE APIs ---
 app.get('/api/products', async (req, res) => {
     const { search } = req.query;
-    let sql = 'SELECT * FROM products';
-    if (search) sql += ` WHERE name LIKE ${db.escape('%' + search + '%')}`;
+    let sql = 'SELECT * FROM products ORDER BY id DESC';
+    if (search) {
+        sql = `SELECT * FROM products WHERE name LIKE ${db.escape('%' + search + '%')} OR brand LIKE ${db.escape('%' + search + '%')} ORDER BY id DESC`;
+    }
     try {
         const [products] = await db.query(sql);
         res.json(products);
@@ -324,9 +261,7 @@ app.get('/api/products/:id/comments', async (req, res) => {
     try {
         const [comments] = await db.query('SELECT * FROM comments WHERE product_id = ? ORDER BY created_at DESC', [req.params.id]);
         res.json(comments);
-    } catch (error) {
-        res.status(500).json({ message: "Failed to fetch comments" });
-    }
+    } catch (error) { res.status(500).json({ message: "Failed to fetch comments" }); }
 });
 
 app.post('/api/products/:id/comments', async (req, res) => {
@@ -335,9 +270,7 @@ app.post('/api/products/:id/comments', async (req, res) => {
         const newComment = { product_id: req.params.id, user_name: userName, user_image: userImage, rating, comment_text: commentText };
         await db.query('INSERT INTO comments SET ?', newComment);
         res.status(201).json({ message: 'Comment added successfully!' });
-    } catch (error) {
-        res.status(500).json({ message: 'Failed to submit comment.' });
-    }
+    } catch (error) { res.status(500).json({ message: 'Failed to submit comment.' }); }
 });
 
 app.get('/api/wishlist', async (req, res) => {
@@ -346,9 +279,7 @@ app.get('/api/wishlist', async (req, res) => {
     try {
         const [wishlist] = await db.query('SELECT p.* FROM wishlist w JOIN products p ON w.product_id = p.id WHERE w.user_email = ?', [email]);
         res.json(wishlist);
-    } catch (error) {
-        res.status(500).json({ message: 'Failed to fetch wishlist' });
-    }
+    } catch (error) { res.status(500).json({ message: 'Failed to fetch wishlist' }); }
 });
 
 app.post('/api/wishlist', async (req, res) => {
@@ -362,17 +293,128 @@ app.post('/api/wishlist', async (req, res) => {
             await db.query('INSERT INTO wishlist SET ?', { user_email: email, product_id: productId });
             res.json({ message: 'Added to wishlist!', added: true });
         }
-    } catch (error) {
-        res.status(500).json({ message: 'Failed to update wishlist' });
-    }
+    } catch (error) { res.status(500).json({ message: 'Failed to update wishlist' }); }
 });
 
 app.get('/api/my-orders', async (req, res) => {
     try {
         const [orders] = await db.query('SELECT * FROM orders WHERE user_email = ? ORDER BY created_at DESC', [req.query.email]);
         res.json(orders);
-    } catch(err) {
-        res.status(500).json({ message: 'Failed to fetch user orders.' });
+    } catch(err) { res.status(500).json({ message: 'Failed to fetch user orders.' }); }
+});
+
+app.put('/api/orders/:orderId/cancel', async (req, res) => {
+    const { orderId } = req.params;
+    const connection = await db.getConnection();
+    try {
+        await connection.beginTransaction();
+        const [orders] = await connection.query("SELECT * FROM orders WHERE id = ?", [orderId]);
+        if (orders.length === 0) throw new Error('Order not found.');
+        if (orders[0].status !== 'Pending') throw new Error(`Cannot cancel an order with status: ${orders[0].status}.`);
+        const [itemsToRestock] = await connection.query("SELECT product_id, quantity FROM order_items WHERE order_id = ?", [orderId]);
+        if (itemsToRestock.length > 0) {
+            const stockUpdatePromises = itemsToRestock.map(item => 
+                connection.query("UPDATE products SET stock = stock + ? WHERE id = ?", [item.quantity, item.product_id])
+            );
+            await Promise.all(stockUpdatePromises);
+        }
+        await connection.query("UPDATE orders SET status = 'Cancelled' WHERE id = ?", [orderId]);
+        await connection.commit();
+        res.json({ message: 'Order has been cancelled and items restocked.' });
+    } catch (error) {
+        await connection.rollback();
+        res.status(500).json({ message: error.message || 'Failed to cancel order.' });
+    } finally {
+        connection.release();
+    }
+});
+
+app.get('/api/payment-history', async (req, res) => {
+    try {
+        const [orders] = await db.query(`
+            SELECT o.id, o.created_at, o.total_amount, o.payment_method, GROUP_CONCAT(oi.product_name SEPARATOR ', ') as products
+            FROM orders o JOIN order_items oi ON o.id = oi.order_id
+            WHERE o.user_email = ? AND o.status != 'Cancelled'
+            GROUP BY o.id ORDER BY o.created_at DESC`, [req.query.email]);
+        res.json(orders);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch payment history.' });
+    }
+});
+
+app.post('/api/contact', async (req, res) => {
+    try {
+        const { name, email, phone, subject, message } = req.body;
+        await sgMail.send({
+            to: 'rishiaravindhaoff@gmail.com', from: 'rishiaravindhaoff@gmail.com', subject: `New Contact Form Message: ${subject}`,
+            html: `<h3>You have a new message from ${name} (${email})</h3><p><b>Phone:</b> ${phone}</p><p><b>Message:</b></p><p>${message}</p>`
+        });
+        await sgMail.send({
+            to: email, from: 'rishiaravindhaoff@gmail.com', subject: 'We have received your message!',
+            html: `<h3>Hi ${name},</h3><p>Thank you for contacting 90s Sports Shop. We have received your message and will get back to you shortly.</p><p>Best Regards,<br>The 90s Sports Team</p>`
+        });
+        res.status(200).json({ message: 'Message sent successfully!' });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to send message.' });
+    }
+});
+
+app.post('/api/place-order', async (req, res) => {
+    const connection = await db.getConnection();
+    try {
+        await connection.beginTransaction();
+        const { userId, customerName, shippingAddress, phone, items, totalAmount } = req.body;
+
+        if (!items || !Array.isArray(items) || items.length === 0) {
+            throw new Error("Order must contain at least one item.");
+        }
+        
+        const productIds = items.map(item => item.id);
+        const [productsInStock] = await connection.query("SELECT id, name, stock FROM products WHERE id IN (?) FOR UPDATE", [productIds]);
+        
+        for (const item of items) {
+            const product = productsInStock.find(p => p.id === item.id);
+            if (!product || product.stock < item.quantity) {
+                throw new Error(`Sorry, we don't have enough stock for ${product ? product.name : 'an item'}.`);
+            }
+        }
+
+        const [userResult] = await connection.query('SELECT email FROM users WHERE id = ?', [userId]);
+        if(userResult.length === 0) throw new Error('User not found');
+
+        const orderData = {
+            user_id: userId, user_email: userResult[0].email, customer_name: customerName,
+            user_phone: phone, shipping_address: shippingAddress, total_amount: totalAmount, 
+            payment_method: "Cash on Delivery", status: 'Pending'
+        };
+        const [orderResult] = await connection.query('INSERT INTO orders SET ?', orderData);
+        const orderId = orderResult.insertId;
+
+        const orderItemsData = items.map(item => [orderId, item.id, item.name, item.quantity, item.price]);
+        await connection.query('INSERT INTO order_items (order_id, product_id, product_name, quantity, price) VALUES ?', [orderItemsData]);
+        
+        const stockUpdatePromises = items.map(item => 
+            connection.query("UPDATE products SET stock = stock - ? WHERE id = ?", [item.quantity, item.id])
+        );
+        await Promise.all(stockUpdatePromises);
+
+        const itemsHtml = items.map(item => `<tr><td>${item.name} (x${item.quantity})</td><td>₹${(item.price * item.quantity).toLocaleString()}</td></tr>`).join('');
+        await sgMail.send({
+            to: orderData.user_email,
+            from: 'rishiaravindhaoff@gmail.com',
+            subject: `Order Confirmation #${orderId}`,
+            html: `<h1>Thank You For Your Order!</h1><p>Your order #${orderId} has been placed successfully.</p><h3>Order Summary:</h3><table border="1" cellpadding="5" cellspacing="0"><thead><tr><th>Product</th><th>Price</th></tr></thead><tbody>${itemsHtml}</tbody></table><h4>Total: ₹${orderData.total_amount.toLocaleString()}</h4><p>Shipping to: ${orderData.shipping_address}</p>`
+        });
+        
+        await connection.commit();
+        res.status(201).json({ message: 'Order placed successfully!', orderId: orderId });
+
+    } catch (error) {
+        await connection.rollback();
+        console.error("PLACE ORDER ERROR:", error);
+        res.status(400).json({ message: error.message || 'Failed to save order.' });
+    } finally {
+        connection.release();
     }
 });
 
@@ -388,144 +430,10 @@ app.get('/api/orders/:orderId', async (req, res) => {
     }
 });
 
-app.put('/api/orders/:orderId/cancel', async (req, res) => {
-    const { orderId } = req.params;
-    const connection = await db.getConnection();
-    try {
-        await connection.beginTransaction();
-
-        const [orders] = await connection.query("SELECT * FROM orders WHERE id = ?", [orderId]);
-        if (orders.length === 0) throw new Error('Order not found.');
-        if (orders[0].status === 'Cancelled' || orders[0].status === 'Delivered') {
-            throw new Error(`Cannot cancel an order that is already ${orders[0].status}.`);
-        }
-
-        const [itemsToRestock] = await connection.query("SELECT product_id, quantity FROM order_items WHERE order_id = ?", [orderId]);
-
-        if (itemsToRestock.length > 0) {
-            const stockUpdatePromises = itemsToRestock.map(item => 
-                connection.query("UPDATE products SET stock = stock + ? WHERE id = ?", [item.quantity, item.product_id])
-            );
-            await Promise.all(stockUpdatePromises);
-        }
-
-        await connection.query("UPDATE orders SET status = 'Cancelled' WHERE id = ?", [orderId]);
-        
-        const emailContent = {
-            to: orders[0].user_email,
-            from: 'rishiaravindhaoff@gmail.com',
-            subject: `Order Cancelled: #${orderId}`,
-            html: `<h1>Your Order #${orderId} has been cancelled.</h1><p>We're sorry to see you go. The items from your order have been restocked. If you have any questions, please contact our support. If you have already paid, a refund will be processed within 3-5 business days.</p>`
-        };
-        await transporter.sendMail(emailContent);
-        
-        await connection.commit();
-        res.json({ message: 'Order has been cancelled and items restocked.' });
-
-    } catch (error) {
-        await connection.rollback();
-        res.status(500).json({ message: error.message || 'Failed to cancel order.' });
-    } finally {
-        connection.release();
-    }
+// --- CATCH-ALL ROUTE FOR FRONTEND ---
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-
-
-app.get('/api/payment-history', async (req, res) => {
-    try {
-        const [orders] = await db.query(`
-            SELECT o.id, o.created_at, o.total_amount, o.payment_method, GROUP_CONCAT(oi.product_name SEPARATOR ', ') as products
-            FROM orders o JOIN order_items oi ON o.id = oi.order_id
-            WHERE o.user_email = ? AND o.status != 'Cancelled'
-            GROUP BY o.id ORDER BY o.created_at DESC`, [req.query.email]);
-        res.json(orders);
-    } catch (error) {
-        res.status(500).json({ message: 'Failed to fetch payment history.' });
-    }
-});
-
-app.post('/api/place-order', async (req, res) => {
-    const connection = await db.getConnection();
-    try {
-        await connection.beginTransaction();
-        const { userDetails, shippingAddress, orderItems, paymentMethod } = req.body;
-
-        const productIds = orderItems.map(item => item.id);
-        const [productsInStock] = await connection.query("SELECT id, name, stock FROM products WHERE id IN (?)", [productIds]);
-        
-        for (const item of orderItems) {
-            const product = productsInStock.find(p => p.id === item.id);
-            if (!product || product.stock < item.quantity) {
-                throw new Error(`Sorry, we don't have enough stock for ${product ? product.name : 'an item'}. Available: ${product ? product.stock : 0}, Requested: ${item.quantity}.`);
-            }
-        }
-
-        const subtotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const shippingFee = subtotal > 5000 ? 0 : 50;
-        const orderData = {
-            user_email: userDetails.email, customer_name: `${userDetails.firstName} ${userDetails.lastName}`,
-            user_phone: userDetails.phone, shipping_address: `${shippingAddress.address}, ${shippingAddress.city}, ${shippingAddress.state} - ${shippingAddress.pincode}`,
-            total_amount: subtotal + shippingFee, payment_method: paymentMethod, status: 'Pending'
-        };
-        const [orderResult] = await connection.query('INSERT INTO orders SET ?', orderData);
-        const orderId = orderResult.insertId;
-        const orderItemsData = orderItems.map(item => [orderId, item.id, item.name, item.quantity, item.price]);
-        await connection.query('INSERT INTO order_items (order_id, product_id, product_name, quantity, price) VALUES ?', [orderItemsData]);
-        
-        const stockUpdatePromises = orderItems.map(item => 
-            connection.query("UPDATE products SET stock = stock - ? WHERE id = ?", [item.quantity, item.id])
-        );
-        await Promise.all(stockUpdatePromises);
-
-        const itemsHtml = orderItems.map(item => `<tr><td>${item.name} (x${item.quantity})</td><td>₹${(item.price * item.quantity).toLocaleString()}</td></tr>`).join('');
-        const emailContent = {
-            to: userDetails.email, from: 'rishiaravindhaoff@gmail.com', subject: `Order Confirmation #${orderId}`,
-            html: `<h1>Thank You For Your Order!</h1><p>Your order #${orderId} has been placed successfully.</p><h3>Order Summary:</h3><table border="1" cellpadding="5" cellspacing="0"><thead><tr><th>Product</th><th>Price</th></tr></thead><tbody>${itemsHtml}</tbody></table><h4>Total: ₹${orderData.total_amount.toLocaleString()}</h4><p>Shipping to: ${orderData.shipping_address}</p>`
-        };
-        await transporter.sendMail(emailContent);
-        
-        await connection.commit();
-        res.status(201).json({ message: 'Order placed successfully!', orderId: orderId });
-
-    } catch (error) {
-        await connection.rollback();
-        console.error("PLACE ORDER ERROR:", error);
-        res.status(400).json({ message: error.message || 'Failed to save order.' });
-    } finally {
-        connection.release();
-    }
-});
-
-app.post('/api/contact', async (req, res) => {
-    try {
-        const { name, email, phone, subject, message } = req.body;
-        
-        const mailToAdmin = {
-            to: 'rishiaravindhaoff@gmail.com', from: 'rishiaravindhaoff@gmail.com', subject: `New Contact Form Message: ${subject}`,
-            html: `<h3>You have a new message from ${name} (${email})</h3><p><b>Phone:</b> ${phone}</p><p><b>Message:</b></p><p>${message}</p>`
-        };
-        await transporter.sendMail(mailToAdmin);
-
-        const mailToUser = {
-            to: email, from: 'rishiaravindhaoff@gmail.com', subject: 'We have received your message!',
-            html: `<h3>Hi ${name},</h3><p>Thank you for contacting 90s Sports Shop. We have received your message and will get back to you shortly.</p><p>Best Regards,<br>The 90s Sports Team</p>`
-        };
-        await transporter.sendMail(mailToUser);
-
-        res.status(200).json({ message: 'Message sent successfully!' });
-    } catch (error) {
-        res.status(500).json({ message: 'Failed to send message.' });
-    }
-});
-
-// --- CATCH-ALL ROUTE FOR FRONTEND (Corrected) ---
-// This route must be the LAST route. It handles all non-API GET requests.
-// 👇 server.js la bottom side, routes ellathukkum last la add pannunga
-app.use((req, res) => {
-  res.sendFile(path.resolve(__dirname, 'index.html'));
-});
-
-
 
 // --- START SERVER ---
 app.listen(PORT, () => {
