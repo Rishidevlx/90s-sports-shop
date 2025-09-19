@@ -363,7 +363,7 @@ app.post('/api/place-order', async (req, res) => {
     const connection = await db.getConnection();
     try {
         await connection.beginTransaction();
-        const { userId, customerName, shippingAddress, phone, items, totalAmount } = req.body;
+        const { userId, customerName, shippingAddress, phone, items, totalAmount, paymentMethod } = req.body;
 
         if (!items || !Array.isArray(items) || items.length === 0) {
             throw new Error("Order must contain at least one item.");
@@ -385,7 +385,7 @@ app.post('/api/place-order', async (req, res) => {
         const orderData = {
             user_id: userId, user_email: userResult[0].email, customer_name: customerName,
             user_phone: phone, shipping_address: shippingAddress, total_amount: totalAmount, 
-            payment_method: "Cash on Delivery", status: 'Pending'
+            payment_method: paymentMethod, status: 'Pending'
         };
         const [orderResult] = await connection.query('INSERT INTO orders SET ?', orderData);
         const orderId = orderResult.insertId;
