@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- API BASE URL LOGIC (Important for Deployment) ---
-    // ITHU THAAN MUKKIYAMANA MAATRAM. Ippo Render la correct ah work aagum.
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const API_BASE_URL = isLocalhost ? 'http://localhost:3000' : '';
 
@@ -25,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (!userProfile) {
-        // Using a custom modal or redirect is better than alert
         console.error("User not logged in. Redirecting...");
         window.location.href = '/login.html';
         return;
@@ -70,9 +68,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function populateUserDetails(profile) {
         if(document.getElementById('email')) document.getElementById('email').value = profile.email || '';
-        const [firstName, ...lastNameParts] = (profile.name || '').split(' ');
-        if(document.getElementById('firstName')) document.getElementById('firstName').value = firstName;
-        if(document.getElementById('lastName')) document.getElementById('lastName').value = lastNameParts.join(' ');
+        if(profile.name) {
+            const [firstName, ...lastNameParts] = profile.name.split(' ');
+            if(document.getElementById('firstName')) document.getElementById('firstName').value = firstName;
+            if(document.getElementById('lastName')) document.getElementById('lastName').value = lastNameParts.join(' ');
+        }
     }
 
     function renderOrderSummary(currentCart) {
@@ -111,17 +111,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         toggleButtonLoading(true);
 
+        // === FIX #2: Payment method ah inga select panrom ===
+        const selectedPaymentMethod = document.querySelector('input[name="payment"]:checked').value;
+
         const orderPayload = {
-            userId: userProfile.id, // We need user ID
+            userId: userProfile.id,
             customerName: `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`,
             shippingAddress: `${document.getElementById('address').value}, ${document.getElementById('city').value}, ${document.getElementById('state').value} - ${document.getElementById('pincode').value}`,
             phone: document.getElementById('phone').value,
             items: cartForCheckout,
-            totalAmount: cartForCheckout.reduce((sum, item) => sum + (item.price * item.quantity), 0) + (cartForCheckout.reduce((sum, item) => sum + (item.price * item.quantity), 0) > 5000 ? 0 : 50)
+            totalAmount: cartForCheckout.reduce((sum, item) => sum + (item.price * item.quantity), 0) + (cartForCheckout.reduce((sum, item) => sum + (item.price * item.quantity), 0) > 5000 ? 0 : 50),
+            paymentMethod: selectedPaymentMethod // === FIX #2: Ippo payload la payment method serthurukom
         };
         
         try {
-            // Intha line ippo correct ah request anupum
             const response = await fetch(`${API_BASE_URL}/api/place-order`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -136,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 sessionStorage.removeItem('buyNowItem');
             } else {
                 const cartKey = `cart_${userProfile.email}`;
-                localStorage.setItem(cartKey, JSON.stringify([])); // Clear user specific cart
+                localStorage.setItem(cartKey, JSON.stringify([])); 
             }
             
             if(typeof window.updateCartDisplay === 'function') {

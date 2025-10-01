@@ -4,7 +4,7 @@ const mysql = require('mysql2/promise');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
-const sgMail = require('@sendgrid/mail'); // Using the modern SendGrid package
+const sgMail = require('@sendgrid/mail');
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
@@ -27,8 +27,7 @@ const dbConfig = {
     database: process.env.DB_NAME,
     port: process.env.DB_PORT || 4000,
     ssl: {
-        // Correctly read the certificate file for Render deployment
-        ca: process.env.DB_SSL_CA_PATH ? fs.readFileSync(path.join(__dirname, process.env.DB_SSL_CA_PATH)) : undefined
+        ca: process.env.DB_SSL_CA_PATH ? fs.readFileSync(process.env.DB_SSL_CA_PATH) : undefined
     }
 };
 const db = mysql.createPool(dbConfig);
@@ -87,6 +86,7 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+// ... (Other routes like /api/user, /api/change-password, etc. remain unchanged)
 app.get('/api/user', async (req, res) => {
     const { email } = req.query;
     if (!email) return res.status(400).json({ message: 'Email is required' });
@@ -236,7 +236,9 @@ app.get('/api/admin/users', async (req, res) => {
     }
 });
 
+
 // --- E-COMMERCE APIs ---
+// ... (Other routes like /api/products, /api/wishlist, etc. remain unchanged)
 app.get('/api/products', async (req, res) => {
     const { search } = req.query;
     let sql = 'SELECT * FROM products ORDER BY id DESC';
@@ -359,6 +361,7 @@ app.post('/api/contact', async (req, res) => {
     }
 });
 
+
 app.post('/api/place-order', async (req, res) => {
     const connection = await db.getConnection();
     try {
@@ -383,9 +386,15 @@ app.post('/api/place-order', async (req, res) => {
         if(userResult.length === 0) throw new Error('User not found');
 
         const orderData = {
-            user_id: userId, user_email: userResult[0].email, customer_name: customerName,
-            user_phone: phone, shipping_address: shippingAddress, total_amount: totalAmount, 
-            payment_method: paymentMethod, status: 'Pending'
+            // === FIX #1: Inga thaan 'user_id' ah remove panrom ===
+            // user_id: userId, // This line is removed
+            user_email: userResult[0].email, 
+            customer_name: customerName,
+            user_phone: phone, 
+            shipping_address: shippingAddress, 
+            total_amount: totalAmount, 
+            payment_method: paymentMethod, 
+            status: 'Pending'
         };
         const [orderResult] = await connection.query('INSERT INTO orders SET ?', orderData);
         const orderId = orderResult.insertId;
@@ -439,4 +448,3 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Backend server is running on port ${PORT}`);
 });
-
